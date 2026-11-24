@@ -1,0 +1,26 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>An invitation to the Link</title>
+<style>*{box-sizing:border-box}body{margin:0;padding:8vh 20px;background:#f2f2f0;color:#1f1f1f;font:16px -apple-system,system-ui,sans-serif}main{max-width:390px;margin:auto}h1{font-size:46px;font-weight:500;letter-spacing:-2px;line-height:1.03;margin:48px 0 26px}h1 span{color:#82827e}p{line-height:1.5}a{display:block;text-align:center;padding:17px;border-radius:32px;text-decoration:none;background:#1f1f1f;color:white;font-weight:600;margin-top:12px}a.secondary{background:white;color:#1f1f1f}a[hidden]{display:none}</style>
+<main><strong>the Link</strong><h1>Give a month,<br><span>get a month.</span></h1><p id="info" role="status">Checking your invitation…</p><a id="open" hidden>Open the Link</a><a class="secondary" id="install" hidden href="https://testflight.apple.com/join/twkD4PgR">Install with TestFlight</a></main>
+<script>
+(async () => {
+    const info = document.querySelector('#info'), open = document.querySelector('#open');
+    const code = new URLSearchParams(location.search).get('r') || '';
+    if (!/^[a-f0-9]{8}(-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i.test(code)) {
+        info.textContent = 'Open the invitation link shared by your friend.'; return;
+    }
+    try {
+        let ticket = sessionStorage.getItem(code);
+        if (!ticket) {
+            const response = await fetch('https://nuniyzslvseulqsimeyj.supabase.co/rest/v1/rpc/link_start_invite', {
+                method:'POST', headers:{apikey:'sb_publishable_6epfLoa93_xB1RfivWgCvA_o5Xn87dG','Content-Type':'application/json'}, body:JSON.stringify({p_code:code})
+            });
+            if (!response.ok) throw new Error();
+            ticket = await response.json();
+            sessionStorage.setItem(code,ticket);
+        }
+        open.href = 'roomcrm://invite/' + code + '?ticket=' + encodeURIComponent(ticket);
+        open.hidden = false; document.querySelector('#install').hidden = false;
+        info.textContent = 'Install the app, then return here and tap Open the Link before creating your account. You and your friend each get a free month.';
+    } catch { info.textContent = 'Couldn’t load this invitation. Check your connection and reopen the link.'; }
+})();
+</script></html>
